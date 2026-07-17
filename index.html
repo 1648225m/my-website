@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Website – Image Gallery</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --card: #1e1e1e;
+      --border: #2a2a2a;
+      --accent: #7c3aed;
+      --accent2: #a78bfa;
+      --text: #f0f0f0;
+      --muted: #888;
+      --success: #22c55e;
+      --error: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent2), #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent2), #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      max-width: 520px;
+      margin: 0 auto 3rem;
+      background: var(--card);
+      border: 2px dashed var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: #1e1530;
+    }
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .upload-zone h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .upload-zone p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    #fileInput { display: none; }
+
+    .btn-upload {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-upload:hover { background: #6d28d9; transform: translateY(-1px); }
+    .btn-upload:active { transform: translateY(0); }
+
+    /* PREVIEW */
+    #preview-area {
+      display: none;
+      max-width: 520px;
+      margin: 0 auto 2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    #preview-area img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    #preview-area .file-name {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      word-break: break-all;
+    }
+    .btn-confirm {
+      width: 100%;
+      background: var(--success);
+      color: #fff;
+      border: none;
+      padding: 0.85rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-confirm:hover { background: #16a34a; }
+    .btn-confirm:disabled { background: #555; cursor: not-allowed; }
+
+    /* STATUS */
+    #status {
+      max-width: 520px;
+      margin: 0 auto 1.5rem;
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+      font-weight: 500;
+    }
+    #status.success { background: #14532d33; border: 1px solid #22c55e55; color: var(--success); }
+    #status.error   { background: #7f1d1d33; border: 1px solid #ef444455; color: var(--error); }
+    #status.loading { background: #1e1530; border: 1px solid var(--accent); color: var(--accent2); }
+
+    /* GALLERY */
+    .gallery-section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+    .gallery-section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .gallery-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .gallery-item:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .gallery-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-item-info {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .gallery-empty {
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 2rem 0;
+    }
+
+    /* PROGRESS BAR */
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+      margin-top: 0.8rem;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 999px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">1648225m</div>
+    <div class="logo-sub">Personal Gallery</div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Share Your <span>Images</span><br/>With the World</h1>
+    <p>Upload any image and it gets saved directly to GitHub — no account needed, instant sharing.</p>
+
+    <!-- UPLOAD ZONE -->
+    <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">📸</div>
+      <h2>Drop your image here</h2>
+      <p>Supports JPG, PNG, GIF, WEBP — up to 10MB</p>
+      <button class="btn-upload" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+        ⬆️ Upload Your Image
+      </button>
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)" />
+    </div>
+
+    <!-- PREVIEW -->
+    <div id="preview-area">
+      <img id="preview-img" src="" alt="Preview" />
+      <div class="file-name" id="file-name-label"></div>
+      <div class="progress-bar-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <button class="btn-confirm" id="confirm-btn" onclick="uploadToGitHub()">
+        ✅ Save to GitHub
+      </button>
+    </div>
+
+    <!-- STATUS -->
+    <div id="status"></div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="gallery-section">
+    <h3>📁 Uploaded Images</h3>
+    <div class="gallery-grid" id="gallery">
+      <p class="gallery-empty" id="gallery-empty">No images yet — upload the first one!</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with ❤️ by 1648225m &nbsp;·&nbsp; Hosted on GitHub Pages
+</footer>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────
+  const GITHUB_TOKEN  = 'YOUR_TOKEN_HERE';
+  const GITHUB_USER   = '1648225m';
+  const GITHUB_REPO   = 'my-website';
+  const IMAGES_FOLDER = 'uploads';
+  // ────────────────────────────────────────────────────────
+
+  let selectedFile = null;
+
+  // Drag & drop
+  const dropZone = document.getElementById('dropZone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) previewFile(file);
+  });
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (file) previewFile(file);
+  }
+
+  function previewFile(file) {
+    if (file.size > 10 * 1024 * 1024) {
+      showStatus('File too large! Max 10MB.', 'error');
+      return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('preview-img').src = ev.target.result;
+      document.getElementById('file-name-label').textContent = `📄 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      document.getElementById('preview-area').style.display = 'block';
+      document.getElementById('status').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = type;
+    el.style.display = 'block';
+  }
+
+  async function uploadToGitHub() {
+    if (!selectedFile) return;
+
+    const btn = document.getElementById('confirm-btn');
+    const progressWrap = document.getElementById('progress-wrap');
+    const progressBar  = document.getElementById('progress-bar');
+
+    btn.disabled = true;
+    btn.textContent = 'Uploading…';
+    progressWrap.style.display = 'block';
+    showStatus('⏳ Uploading to GitHub…', 'loading');
+
+    // Animate progress bar
+    let pct = 0;
+    const ticker = setInterval(() => {
+      pct = Math.min(pct + 5, 85);
+      progressBar.style.width = pct + '%';
+    }, 120);
+
+    try {
+      // Read as base64
+      const base64 = await toBase64(selectedFile);
+
+      // Unique filename with timestamp
+      const ts   = Date.now();
+      const ext  = selectedFile.name.split('.').pop();
+      const name = `img_${ts}.${ext}`;
+      const path = `${IMAGES_FOLDER}/${name}`;
+
+      const res = await fetch(
+        `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${path}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: `Upload image: ${name}`,
+            content: base64,
+          }),
+        }
+      );
+
+      clearInterval(ticker);
+      progressBar.style.width = '100%';
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Upload failed');
+      }
+
+      const data = await res.json();
+      const imgUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}`;
+
+      showStatus(`✅ Saved! View at: ${imgUrl}`, 'success');
+      addToGallery(imgUrl, name);
+
+      // Reset
+      setTimeout(() => {
+        document.getElementById('preview-area').style.display = 'none';
+        document.getElementById('fileInput').value = '';
+        progressWrap.style.display = 'none';
+        progressBar.style.width = '0%';
+        selectedFile = null;
+        btn.disabled = false;
+        btn.textContent = '✅ Save to GitHub';
+      }, 2000);
+
+    } catch (err) {
+      clearInterval(ticker);
+      progressWrap.style.display = 'none';
+      showStatus(`❌ Error: ${err.message}`, 'error');
+      btn.disabled = false;
+      btn.textContent = '✅ Save to GitHub';
+    }
+  }
+
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload  = () => resolve(r.result.split(',')[1]);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  function addToGallery(url, name) {
+    document.getElementById('gallery-empty')?.remove();
+    const grid = document.getElementById('gallery');
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.innerHTML = `
+      <img src="${url}" alt="${name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖼️</text></svg>'" />
+      <div class="gallery-item-info">${name}</div>
+    `;
+    grid.prepend(item);
+  }
+
+  // Load existing images from GitHub on page load
+  async function loadGallery() {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${IMAGES_FOLDER}`,
+        { headers: { Authorization: `Bearer ${GITHUB_TOKEN}` } }
+      );
+      if (!res.ok) return;
+      const files = await res.json();
+      if (!Array.isArray(files) || files.length === 0) return;
+      document.getElementById('gallery-empty')?.remove();
+      files.reverse().forEach(f => {
+        const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${IMAGES_FOLDER}/${f.name}`;
+        addToGallery(url, f.name);
+      });
+    } catch (_) {}
+  }
+
+  loadGallery();
+</script>
+</body>
+</html>

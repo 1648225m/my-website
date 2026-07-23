@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - MasterComputer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">💾 MasterComputer</div>
+            <div class="nav-links">
+                <span id="userName">Welcome, User!</span>
+                <button id="logoutBtn" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="storage-info">
+                <h3>Storage Usage</h3>
+                <div class="storage-bar">
+                    <div id="storageFill" class="storage-fill" style="width: 0%"></div>
+                </div>
+                <p id="storageText">0 MB / 5 GB used</p>
+            </div>
+            <div class="sidebar-menu">
+                <button id="uploadBtn" class="menu-btn">📤 Upload File</button>
+                <button id="newFolderBtn" class="menu-btn">📁 New Folder</button>
+                <button id="refreshBtn" class="menu-btn">🔄 Refresh</button>
+            </div>
+        </aside>
+
+        <main class="file-area">
+            <div class="breadcrumb">
+                <span id="currentPath">/</span>
+            </div>
+            <div id="fileGrid" class="file-grid">
+                <!-- Files and folders will load here -->
+                <div class="loading">Loading your files...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Upload File</h2>
+            <div class="drop-zone" id="dropZone">
+                <p>📂 Drag & drop files here<br><small>or click to browse</small></p>
+                <input type="file" id="fileInput" multiple style="display:none">
+            </div>
+            <div id="uploadProgress" class="progress-bar" style="display:none">
+                <div id="progressFill" class="progress-fill" style="width:0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
